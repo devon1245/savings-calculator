@@ -2,7 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(page_title="Savings Growth Scenarios", layout="wide")
+st.set_page_config(
+    page_title="Savings Scenarios",
+    page_icon="📈",
+    layout="wide"
+)
+
 
 # --------------------
 # STYLING
@@ -147,3 +152,4 @@ for i, (name, rate) in enumerate(scenarios.items()):
             value=f"R {balances[-1]:,.0f}",
             delta=f"Total contributed: R {total_contrib:,.0f}"
         )
+
