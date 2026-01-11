@@ -48,16 +48,16 @@ st.subheader("Return assumptions")
 lower_return = st.slider(
     "Lower expected return (%)",
     min_value=5.0,
-    max_value=8.0,
+    max_value=9.0,
     value=6.0,
     step=0.5
 )
 
 higher_return = st.slider(
     "Higher expected return (%)",
-    min_value=8.0,
-    max_value=11.0,
-    value=9.0,
+    min_value=9.0,
+    max_value=15.0,
+    value=11.0,
     step=0.5
 )
 
@@ -119,10 +119,10 @@ df = pd.DataFrame(rows)
 st.header("Projected growth")
 
 color_map = {
-    "Current saving – lower return": "#6baed6",
-    "Current saving – higher return": "#08519c",
-    "+R500 saving – lower return": "#74c476",
-    "+R500 saving – higher return": "#006d2c",
+    "Current saving – lower return": "#9ecae1",   # light blue
+    "Current saving – higher return": "#08519c",  # dark blue
+    "+R500 saving – lower return": "#fdae6b",     # light orange
+    "+R500 saving – higher return": "#d94801",    # dark orange
 }
 
 fig = px.line(
@@ -164,7 +164,7 @@ with col1:
     )[-1]
 
     st.markdown(
-        f"<span style='color:#6baed6'>Lower return:</span> "
+        f"<span style='color:#9ecae1'>Lower return:</span> "
         f"<strong>R {low_base:,.0f}</strong>",
         unsafe_allow_html=True
     )
@@ -188,21 +188,4 @@ with col2:
     )[-1]
 
     st.markdown(
-        f"<span style='color:#74c476'>Lower return:</span> "
-        f"<strong>R {low_extra:,.0f}</strong>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        f"<span style='color:#006d2c'>Higher return:</span> "
-        f"<strong>R {high_extra:,.0f}</strong>",
-        unsafe_allow_html=True
-    )
-
-# -------------------------------------------------
-# FOOTNOTE
-# -------------------------------------------------
-st.caption(
-    "Illustrative calculations only. Returns are not guaranteed. "
-    "This tool supports financial planning discussions."
-)
+        f"<span style='color:#fdae6b'
