@@ -11,13 +11,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# -------------------------------------------------
-# TITLE
-# -------------------------------------------------
 st.title("Savings Scenarios")
-st.markdown(
-    "This illustration shows how saving behaviour and market conditions "
-    "both affect long-term outcomes."
+st.write(
+    "Demonstrating how saving behaviour and market variability "
+    "impact long-term outcomes."
 )
 
 # -------------------------------------------------
@@ -25,7 +22,7 @@ st.markdown(
 # -------------------------------------------------
 st.header("Inputs")
 
-monthly_contribution = st.number_input(
+monthly = st.number_input(
     "Monthly contribution (R)",
     value=2000.0,
     step=100.0
@@ -57,12 +54,4 @@ higher_return = st.slider(
     "Higher expected return (%)",
     min_value=9.0,
     max_value=15.0,
-    value=11.0,
-    step=0.5
-)
-
-EXTRA_MONTHLY = 500
-
-# -------------------------------------------------
-# CALCULATION FUNCTION
-# -
+    v
