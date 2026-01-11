@@ -7,90 +7,83 @@ from io import BytesIO
 
 st.set_page_config(layout="wide")
 
-st.title("Savings Scenarios")
-st.write("Showing how saving behaviour matters even when returns fluctuate.")
+st.title("Savings")
 
-# ------------------
 # INPUTS
-# ------------------
-lump_sum = st.number_input("Current savings (R)", 0.0, step=1000.0)
-monthly = st.number_input("Monthly contribution (R)", 2000.0, step=100.0)
-annual_inc = st.number_input("Annual increase (%)", 5.0, step=0.5)
-years = st.number_input("Years to invest", 20, step=1)
+lump = st.number_input("", 0.0, step=1000.0)
+monthly = st.number_input("", 2000.0, step=100.0)
+inc = st.number_input("", 5.0, step=0.5)
+yrs = st.number_input("", 20, step=1)
 
-low_ret = st.slider("Lower return (%)", 5.0, 9.0, 6.0, 0.5)
-high_ret = st.slider("Higher return (%)", 9.0, 15.0, 11.0, 0.5)
+low = st.slider("", 5.0, 9.0, 6.0, 0.5)
+high = st.slider("", 9.0, 15.0, 11.0, 0.5)
 
-extra = st.checkbox("Add R500 per month")
-EXTRA = 500
+extra = st.checkbox("")
+ADD = 500
 
-# ------------------
-# CALCULATION
-# ------------------
-def grow(start, monthly, inc, r, y):
-    bal = start
-    c = monthly
-    out = []
-    for i in range(1, y * 12 + 1):
-        if i % 12 == 1 and i > 1:
-            c *= (1 + inc / 100)
-        bal = bal * (1 + r / 100 / 12) + c
-        out.append(bal)
-    return out
+# CALC
+def g(start, m, i, r, y):
+    b = start
+    c = m
+    o = []
+    for k in range(1, y * 12 + 1):
+        if k % 12 == 1 and k > 1:
+            c *= (1 + i / 100)
+        b = b * (1 + r / 100 / 12) + c
+        o.append(b)
+    return o
 
-# ------------------
 # DATA
-# ------------------
 rows = []
 
-base_low = grow(lump_sum, monthly, annual_inc, low_ret, years)
-base_high = grow(lump_sum, monthly, annual_inc, high_ret, years)
+a = g(lump, monthly, inc, low, yrs)
+b = g(lump, monthly, inc, high, yrs)
 
-for i, v in enumerate(base_low):
-    rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Current low"})
+for n, v in enumerate(a):
+    rows.append({"x": (n + 1) / 12, "y": v, "z": 1})
 
-for i, v in enumerate(base_high):
-    rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Current high"})
+for n, v in enumerate(b):
+    rows.append({"x": (n + 1) / 12, "y": v, "z": 2})
 
 if extra:
-    ext_low = grow(lump_sum, monthly + EXTRA, annual_inc, low_ret, years)
-    ext_high = grow(lump_sum, monthly + EXTRA, annual_inc, high_ret, years)
+    c = g(lump, monthly + ADD, inc, low, yrs)
+    d = g(lump, monthly + ADD, inc, high, yrs)
 
-    for i, v in enumerate(ext_low):
-        rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Extra low"})
+    for n, v in enumerate(c):
+        rows.append({"x": (n + 1) / 12, "y": v, "z": 3})
 
-    for i, v in enumerate(ext_high):
-        rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Extra high"})
+    for n, v in enumerate(d):
+        rows.append({"x": (n + 1) / 12, "y": v, "z": 4})
 
 df = pd.DataFrame(rows)
 
-# ------------------
 # GRAPH
-# ------------------
-colors = {
-    "Current low": "#9ecae1",
-    "Current high": "#08519c",
-    "Extra low": "#fdae6b",
-    "Extra high": "#d94801",
-}
-
-st.header("Projected growth")
-fig = px.line(df, x="Year", y="Value", color="Line", color_discrete_map=colors)
+fig = px.line(df, x="x", y="y", color="z")
 st.plotly_chart(fig, use_container_width=True)
 
-# ------------------
-# TOTALS (NO METRIC, NO QUOTES RISK)
-# ------------------
-st.header("Value at end")
-
+# TOTALS
 c1, c2 = st.columns(2)
 
 with c1:
-    st.subheader("🔵 Current saving")
-    st.write("Lower return:", f"R {base_low[-1]:,.0f}")
-    st.write("Higher return:", f"R {base_high[-1]:,.0f}")
+    st.write(a[-1])
+    st.write(b[-1])
 
 with c2:
-    st.subheader("🟧 Saving + R500")
     if extra:
-        st.write("Lowe
+        st.write(c[-1])
+        st.write(d[-1])
+
+# PDF
+def p():
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    c.drawString(40, 800, str(a[-1]))
+    c.drawString(40, 780, str(b[-1]))
+    if extra:
+        c.drawString(40, 760, str(c[-1]))
+        c.drawString(40, 740, str(d[-1]))
+    c.save()
+    buf.seek(0)
+    return buf
+
+st.download_button("", p(), "s.pdf")
