@@ -6,9 +6,12 @@ import plotly.express as px
 # PAGE SETUP
 # ------------------
 st.set_page_config(layout="wide")
-st.title("Savings Scenarios – Step A")
+st.title("Savings Scenarios – Step B")
 
-st.write("Step A: verifying calculations + checkbox + graph")
+st.write(
+    "Showing how saving behaviour and market variability "
+    "affect long-term outcomes."
+)
 
 # ------------------
 # INPUTS
@@ -41,40 +44,48 @@ def grow(monthly, annual_inc, rate, years):
     return out
 
 # ------------------
-# BUILD DATA
+# BUILD DATA FOR GRAPH
 # ------------------
 rows = []
 
-# Always include base scenario
-for rate, label in [
-    (lower_return, "Current – lower return"),
-    (higher_return, "Current – higher return")
-]:
-    balances = grow(monthly, annual_increase, rate, years)
-    for i, b in enumerate(balances):
+# Base saving scenarios
+base_low = grow(monthly, annual_increase, lower_return, years)
+base_high = grow(monthly, annual_increase, higher_return, years)
+
+for i, b in enumerate(base_low):
+    rows.append({
+        "Year": (i + 1) / 12,
+        "Balance": b,
+        "Scenario": "Current – lower return"
+    })
+
+for i, b in enumerate(base_high):
+    rows.append({
+        "Year": (i + 1) / 12,
+        "Balance": b,
+        "Scenario": "Current – higher return"
+    })
+
+# Extra saving scenarios (optional)
+if show_extra:
+    extra_low = grow(monthly + EXTRA, annual_increase, lower_return, years)
+    extra_high = grow(monthly + EXTRA, annual_increase, higher_return, years)
+
+    for i, b in enumerate(extra_low):
         rows.append({
             "Year": (i + 1) / 12,
             "Balance": b,
-            "Scenario": label
+            "Scenario": "+R500 – lower return"
         })
 
-# Optional extra saving
-if show_extra:
-    for rate, label in [
-        (lower_return, "+R500 – lower return"),
-        (higher_return, "+R500 – higher return")
-    ]:
-        balances = grow(monthly + EXTRA, annual_increase, rate, years)
-        for i, b in enumerate(balances):
-            rows.append({
-                "Year": (i + 1) / 12,
-                "Balance": b,
-                "Scenario": label
-            })
+    for i, b in enumerate(extra_high):
+        rows.append({
+            "Year": (i + 1) / 12,
+            "Balance": b,
+            "Scenario": "+R500 – higher return"
+        })
 
 df = pd.DataFrame(rows)
-
-st.write("DEBUG rows:", len(df))
 
 # ------------------
 # GRAPH
@@ -87,3 +98,43 @@ fig = px.line(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+# ------------------
+# TOTALS
+# ------------------
+st.header("Value at end of period")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("Current saving")
+
+    st.metric(
+        "Lower return",
+        f"R {base_low[-1]:,.0f}"
+    )
+
+    st.metric(
+        "Higher return",
+        f"R {base_high[-1]:,.0f}"
+    )
+
+with col2:
+    st.subheader("Saving + R500")
+
+    if show_extra:
+        st.metric(
+            "Lower return",
+            f"R {extra_low[-1]:,.0f}"
+        )
+
+        st.metric(
+            "Higher return",
+            f"R {extra_high[-1]:,.0f}"
+        )
+    else:
+        st.info("Tick the checkbox above to see this comparison.")
+
+st.caption(
+    "Illustrative calculations only. Returns are not guaranteed."
+)
