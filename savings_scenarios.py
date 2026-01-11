@@ -2,16 +2,18 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# -------------------------------------------------
+# PAGE CONFIG
+# -------------------------------------------------
 st.set_page_config(
     page_title="Savings Scenarios",
     page_icon="📈",
     layout="wide"
 )
 
-
-# --------------------
-# STYLING
-# --------------------
+# -------------------------------------------------
+# STYLING (mobile friendly)
+# -------------------------------------------------
 st.markdown("""
 <style>
 html, body, [class*="css"] {
@@ -25,15 +27,15 @@ div[data-testid="stMetricValue"] {
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------
+# -------------------------------------------------
 # TITLE
-# --------------------
-st.title("Savings Growth Scenarios")
-st.markdown("Adjust the inputs to explore different outcomes.")
+# -------------------------------------------------
+st.title("Savings Scenarios")
+st.markdown("Explore how small changes in saving behaviour can make a big difference.")
 
-# --------------------
+# -------------------------------------------------
 # INPUTS
-# --------------------
+# -------------------------------------------------
 st.header("Inputs")
 
 monthly_contribution = st.number_input(
@@ -59,97 +61,46 @@ years = st.number_input(
 
 st.subheader("Assumed annual return")
 
-conservative_return = st.slider("Conservative (%)", 0.0, 15.0, 6.0, 0.5)
-moderate_return = st.slider("Moderate (%)", 0.0, 15.0, 8.0, 0.5)
-optimistic_return = st.slider("Optimistic (%)", 0.0, 15.0, 10.0, 0.5)
-
-# --------------------
-# CALCULATION
-# --------------------
-def calculate_growth(monthly, annual_increase, annual_return, years):
-    months = years * 12
-    monthly_rate = annual_return / 100 / 12
-    annual_increase_rate = annual_increase / 100
-
-    balance = 0.0
-    contribution = monthly
-    balances = []
-    total_contributions = 0.0
-
-    for m in range(1, months + 1):
-        if m % 12 == 1 and m > 1:
-            contribution *= (1 + annual_increase_rate)
-
-        balance = balance * (1 + monthly_rate) + contribution
-        total_contributions += contribution
-        balances.append(balance)
-
-    return balances, total_contributions
-
-# --------------------
-# BUILD DATA
-# --------------------
-scenarios = {
-    "Conservative": conservative_return,
-    "Moderate": moderate_return,
-    "Optimistic": optimistic_return
-}
-
-rows = []
-
-for name, rate in scenarios.items():
-    balances, total_contrib = calculate_growth(
-        monthly_contribution,
-        annual_increase,
-        rate,
-        years
-    )
-
-    for i, bal in enumerate(balances):
-        rows.append({
-            "Year": (i + 1) / 12,
-            "Balance": bal,
-            "Scenario": name
-        })
-
-df = pd.DataFrame(rows)
-
-# --------------------
-# OUTPUTS (FORCED)
-# --------------------
-st.header("Projected Growth")
-
-st.write(f"DEBUG: data points = {len(df)}")
-
-fig = px.line(
-    df,
-    x="Year",
-    y="Balance",
-    color="Scenario",
-    labels={
-        "Balance": "Portfolio Value (R)",
-        "Year": "Years"
-    }
+conservative_return = st.slider(
+    "Conservative return (%)",
+    min_value=4.0,
+    max_value=10.0,
+    value=6.0,
+    step=0.5,
+    format="%.1f%%"
 )
 
-st.plotly_chart(fig, use_container_width=True)
+moderate_return = st.slider(
+    "Moderate return (%)",
+    min_value=6.0,
+    max_value=12.0,
+    value=8.0,
+    step=0.5,
+    format="%.1f%%"
+)
 
-st.header("Summary at End of Period")
+optimistic_return = st.slider(
+    "Optimistic return (%)",
+    min_value=8.0,
+    max_value=14.0,
+    value=10.0,
+    step=0.5,
+    format="%.1f%%"
+)
 
-cols = st.columns(3)
+# -------------------------------------------------
+# BEHAVIOURAL NUDGE
+# -------------------------------------------------
+st.subheader("Saving behaviour")
 
-for i, (name, rate) in enumerate(scenarios.items()):
-    balances, total_contrib = calculate_growth(
-        monthly_contribution,
-        annual_increase,
-        rate,
-        years
-    )
+show_extra_saving = st.checkbox(
+    "Show impact of saving R500 more per month",
+    value=False
+)
 
-    with cols[i]:
-        st.metric(
-            label=name,
-            value=f"R {balances[-1]:,.0f}",
-            delta=f"Total contributed: R {total_contrib:,.0f}"
-        )
+EXTRA_MONTHLY = 500
 
+# -------------------------------------------------
+# CALCULATION FUNCTION
+# -------------------------------------------------
+def calculate_growth(monthly, annua_
