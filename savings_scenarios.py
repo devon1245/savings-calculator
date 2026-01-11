@@ -2,96 +2,76 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# ------------------
-# PAGE SETUP
-# ------------------
-st.set_page_config(
-    page_title="Savings Scenarios",
-    page_icon="📈",
-    layout="wide"
-)
+st.set_page_config(layout="wide")
 
 st.title("Savings Scenarios")
-st.write(
-    "This illustration shows how saving behaviour matters "
-    "even when investment returns fluctuate."
-)
 
 # ------------------
 # INPUTS
 # ------------------
-st.header("Inputs")
+monthly = st.number_input("Monthly contribution", 2000.0, step=100.0)
+annual_inc = st.number_input("Annual increase percent", 5.0, step=0.5)
+years = st.number_input("Years to invest", 20, step=1)
 
-monthly = st.number_input(
-    "Monthly contribution (R)",
-    2000.0,
-    step=100.0
-)
+low_ret = st.slider("Lower return percent", 5.0, 9.0, 6.0, 0.5)
+high_ret = st.slider("Higher return percent", 9.0, 15.0, 11.0, 0.5)
 
-annual_increase = st.number_input(
-    "Annual increase in contribution (%)",
-    5.0,
-    step=0.5
-)
-
-years = st.number_input(
-    "Years to invest",
-    20,
-    step=1
-)
-
-st.subheader("Return assumptions")
-
-lower_return = st.slider(
-    "Lower expected return (%)",
-    5.0, 9.0, 6.0, 0.5
-)
-
-higher_return = st.slider(
-    "Higher expected return (%)",
-    9.0, 15.0, 11.0, 0.5
-)
-
-show_extra = st.checkbox(
-    "Show impact of saving R500 more per month"
-)
-
+extra = st.checkbox("Add R500 per month")
 EXTRA = 500
 
 # ------------------
 # CALCULATION
 # ------------------
-def grow(monthly, annual_inc, rate, years):
+def grow(m, inc, r, y):
     bal = 0.0
-    contrib = monthly
+    c = m
     out = []
-
-    for m in range(1, years * 12 + 1):
-        if m % 12 == 1 and m > 1:
-            contrib *= (1 + annual_inc / 100)
-
-        bal = bal * (1 + rate / 100 / 12) + contrib
+    for i in range(1, y * 12 + 1):
+        if i % 12 == 1 and i > 1:
+            c *= (1 + inc / 100)
+        bal = bal * (1 + r / 100 / 12) + c
         out.append(bal)
-
     return out
 
 # ------------------
-# BUILD DATA
+# DATA
 # ------------------
 rows = []
 
-base_low = grow(monthly, annual_increase, lower_return, years)
-base_high = grow(monthly, annual_increase, higher_return, years)
+base_low = grow(monthly, annual_inc, low_ret, years)
+base_high = grow(monthly, annual_inc, high_ret, years)
 
-for i, b in enumerate(base_low):
-    rows.append({
-        "Year": (i + 1) / 12,
-        "Balance": b,
-        "Scenario": "Current saving – lower return"
-    })
+for i, v in enumerate(base_low):
+    rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Base low"})
 
-for i, b in enumerate(base_high):
-    rows.append({
-        "Year": (i + 1) / 12,
-        "Balance": b,
-        "Sc
+for i, v in enumerate(base_high):
+    rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Base high"})
+
+if extra:
+    ext_low = grow(monthly + EXTRA, annual_inc, low_ret, years)
+    ext_high = grow(monthly + EXTRA, annual_inc, high_ret, years)
+
+    for i, v in enumerate(ext_low):
+        rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Extra low"})
+
+    for i, v in enumerate(ext_high):
+        rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Extra high"})
+
+df = pd.DataFrame(rows)
+
+# ------------------
+# GRAPH
+# ------------------
+fig = px.line(df, x="Year", y="Value", color="Line")
+st.plotly_chart(fig, use_container_width=True)
+
+# ------------------
+# TOTALS
+# ------------------
+st.header("Totals at end")
+
+c1, c2 = st.columns(2)
+
+with c1:
+    st.subheader("Current")
+    st.metr
