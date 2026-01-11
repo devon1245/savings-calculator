@@ -53,47 +53,31 @@ base_low = grow(monthly, annual_inc, low_ret, years)
 base_high = grow(monthly, annual_inc, high_ret, years)
 
 for i, v in enumerate(base_low):
-    rows.append({
-        "Year": (i + 1) / 12,
-        "Value": v,
-        "Line": "Current low"
-    })
+    rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Current low"})
 
 for i, v in enumerate(base_high):
-    rows.append({
-        "Year": (i + 1) / 12,
-        "Value": v,
-        "Line": "Current high"
-    })
+    rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Current high"})
 
 if extra:
     ext_low = grow(monthly + EXTRA, annual_inc, low_ret, years)
     ext_high = grow(monthly + EXTRA, annual_inc, high_ret, years)
 
     for i, v in enumerate(ext_low):
-        rows.append({
-            "Year": (i + 1) / 12,
-            "Value": v,
-            "Line": "Extra low"
-        })
+        rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Extra low"})
 
     for i, v in enumerate(ext_high):
-        rows.append({
-            "Year": (i + 1) / 12,
-            "Value": v,
-            "Line": "Extra high"
-        })
+        rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Extra high"})
 
 df = pd.DataFrame(rows)
 
 # ------------------
-# COLOUR GROUPING
+# COLOURS
 # ------------------
 color_map = {
-    "Current low": "#9ecae1",    # light blue
-    "Current high": "#08519c",   # dark blue
-    "Extra low": "#fdae6b",      # light orange
-    "Extra high": "#d94801",     # dark orange
+    "Current low": "#9ecae1",
+    "Current high": "#08519c",
+    "Extra low": "#fdae6b",
+    "Extra high": "#d94801",
 }
 
 # ------------------
@@ -107,40 +91,7 @@ fig = px.line(
     y="Value",
     color="Line",
     color_discrete_map=color_map,
-    labels={
-        "Value": "Portfolio value (R)",
-        "Year": "Years"
-    }
+    labels={"Value": "Portfolio value (R)", "Year": "Years"}
 )
 
-fig.update_layout(
-    legend_title_text="",
-    hovermode="x unified"
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-# ------------------
-# TOTALS
-# ------------------
-st.header("Value at end of period")
-
-c1, c2 = st.columns(2)
-
-with c1:
-    st.subheader("Current saving")
-    st.metric("Lower return", f"R {base_low[-1]:,.0f}")
-    st.metric("Higher return", f"R {base_high[-1]:,.0f}")
-
-with c2:
-    st.subheader("Saving + R500")
-    if extra:
-        st.metric("Lower return", f"R {ext_low[-1]:,.0f}")
-        st.metric("Higher return", f"R {ext_high[-1]:,.0f}")
-    else:
-        st.write("Tick the checkbox above to see this comparison.")
-
-# ------------------
-# FOOTNOTE
-# ------------------
-st.caption("Illustrative only. Returns are not guaranteed.")
+fig.update_layout(legend_title_t_
