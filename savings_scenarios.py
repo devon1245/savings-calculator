@@ -10,6 +10,7 @@ st.write("Showing how saving behaviour matters even when returns fluctuate.")
 # ------------------
 # INPUTS
 # ------------------
+lump_sum = st.number_input("Current savings / lump sum (R)", 0.0, step=1000.0)
 monthly = st.number_input("Monthly contribution (R)", 2000.0, step=100.0)
 annual_inc = st.number_input("Annual increase (%)", 5.0, step=0.5)
 years = st.number_input("Years to invest", 20, step=1)
@@ -23,15 +24,17 @@ EXTRA = 500
 # ------------------
 # CALCULATION
 # ------------------
-def grow(m, inc, r, y):
-    bal = 0.0
-    c = m
+def grow(start, monthly, inc, r, y):
+    bal = start
+    contrib = monthly
     out = []
+
     for i in range(1, y * 12 + 1):
         if i % 12 == 1 and i > 1:
-            c *= (1 + inc / 100)
-        bal = bal * (1 + r / 100 / 12) + c
+            contrib *= (1 + inc / 100)
+        bal = bal * (1 + r / 100 / 12) + contrib
         out.append(bal)
+
     return out
 
 # ------------------
@@ -39,8 +42,8 @@ def grow(m, inc, r, y):
 # ------------------
 rows = []
 
-base_low = grow(monthly, annual_inc, low_ret, years)
-base_high = grow(monthly, annual_inc, high_ret, years)
+base_low = grow(lump_sum, monthly, annual_inc, low_ret, years)
+base_high = grow(lump_sum, monthly, annual_inc, high_ret, years)
 
 for i, v in enumerate(base_low):
     rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Current low"})
@@ -49,8 +52,8 @@ for i, v in enumerate(base_high):
     rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Current high"})
 
 if extra:
-    ext_low = grow(monthly + EXTRA, annual_inc, low_ret, years)
-    ext_high = grow(monthly + EXTRA, annual_inc, high_ret, years)
+    ext_low = grow(lump_sum, monthly + EXTRA, annual_inc, low_ret, years)
+    ext_high = grow(lump_sum, monthly + EXTRA, annual_inc, high_ret, years)
 
     for i, v in enumerate(ext_low):
         rows.append({"Year": (i + 1) / 12, "Value": v, "Line": "Extra low"})
@@ -78,7 +81,7 @@ fig = px.line(df, x="Year", y="Value", color="Line", color_discrete_map=colors)
 st.plotly_chart(fig, use_container_width=True)
 
 # ------------------
-# TOTALS (FIXED METRICS)
+# TOTALS
 # ------------------
 st.header("Value at end of period")
 
