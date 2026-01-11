@@ -2,17 +2,10 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# ------------------
-# PAGE SETUP
-# ------------------
-st.set_page_config(
-    page_title="Savings Scenarios",
-    page_icon="📈",
-    layout="wide"
-)
+st.set_page_config(layout="wide")
 
 st.title("Savings Scenarios")
-st.write("Showing how saving behaviour matters, even when returns fluctuate.")
+st.write("Showing how saving behaviour matters even when returns fluctuate.")
 
 # ------------------
 # INPUTS
@@ -21,8 +14,8 @@ monthly = st.number_input("Monthly contribution (R)", 2000.0, step=100.0)
 annual_inc = st.number_input("Annual increase (%)", 5.0, step=0.5)
 years = st.number_input("Years to invest", 20, step=1)
 
-low_ret = st.slider("Lower expected return (%)", 5.0, 9.0, 6.0, 0.5)
-high_ret = st.slider("Higher expected return (%)", 9.0, 15.0, 11.0, 0.5)
+low_ret = st.slider("Lower return (%)", 5.0, 9.0, 6.0, 0.5)
+high_ret = st.slider("Higher return (%)", 9.0, 15.0, 11.0, 0.5)
 
 extra = st.checkbox("Show impact of saving R500 more per month")
 EXTRA = 500
@@ -30,22 +23,21 @@ EXTRA = 500
 # ------------------
 # CALCULATION
 # ------------------
-def grow(monthly, inc, rate, years):
+def grow(m, inc, r, y):
     bal = 0.0
-    contrib = monthly
+    c = m
     out = []
 
-    for m in range(1, years * 12 + 1):
-        if m % 12 == 1 and m > 1:
-            contrib *= (1 + inc / 100)
-
-        bal = bal * (1 + rate / 100 / 12) + contrib
+    for i in range(1, y * 12 + 1):
+        if i % 12 == 1 and i > 1:
+            c *= (1 + inc / 100)
+        bal = bal * (1 + r / 100 / 12) + c
         out.append(bal)
 
     return out
 
 # ------------------
-# BUILD DATA
+# DATA
 # ------------------
 rows = []
 
@@ -73,7 +65,7 @@ df = pd.DataFrame(rows)
 # ------------------
 # COLOURS
 # ------------------
-color_map = {
+colors = {
     "Current low": "#9ecae1",
     "Current high": "#08519c",
     "Extra low": "#fdae6b",
@@ -90,8 +82,19 @@ fig = px.line(
     x="Year",
     y="Value",
     color="Line",
-    color_discrete_map=color_map,
-    labels={"Value": "Portfolio value (R)", "Year": "Years"}
+    color_discrete_map=colors
 )
 
-fig.update_layout(legend_title_t_
+st.plotly_chart(fig, use_container_width=True)
+
+# ------------------
+# TOTALS (VISUALLY MATCH GRAPH)
+# ------------------
+st.header("Value at end of period")
+
+c1, c2 = st.columns(2)
+
+with c1:
+    st.subheader("🔵 Current saving")
+    st.metric("Lower return", f"R {base_low[-1]:,.0f}")
+    st.metric
