@@ -27,13 +27,11 @@ def grow(m, inc, r, y):
     bal = 0.0
     c = m
     out = []
-
     for i in range(1, y * 12 + 1):
         if i % 12 == 1 and i > 1:
             c *= (1 + inc / 100)
         bal = bal * (1 + r / 100 / 12) + c
         out.append(bal)
-
     return out
 
 # ------------------
@@ -76,19 +74,11 @@ colors = {
 # GRAPH
 # ------------------
 st.header("Projected growth")
-
-fig = px.line(
-    df,
-    x="Year",
-    y="Value",
-    color="Line",
-    color_discrete_map=colors
-)
-
+fig = px.line(df, x="Year", y="Value", color="Line", color_discrete_map=colors)
 st.plotly_chart(fig, use_container_width=True)
 
 # ------------------
-# TOTALS (VISUALLY MATCH GRAPH)
+# TOTALS (FIXED METRICS)
 # ------------------
 st.header("Value at end of period")
 
@@ -97,4 +87,14 @@ c1, c2 = st.columns(2)
 with c1:
     st.subheader("🔵 Current saving")
     st.metric("Lower return", f"R {base_low[-1]:,.0f}")
-    st.metric
+    st.metric("Higher return", f"R {base_high[-1]:,.0f}")
+
+with c2:
+    st.subheader("🟧 Saving + R500")
+    if extra:
+        st.metric("Lower return", f"R {ext_low[-1]:,.0f}")
+        st.metric("Higher return", f"R {ext_high[-1]:,.0f}")
+    else:
+        st.write("Tick the checkbox above to see this comparison")
+
+st.caption("Illustrative only. Returns are not guaranteed.")
