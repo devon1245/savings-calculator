@@ -87,7 +87,6 @@ df = pd.DataFrame(rows)
 # -----------------------------
 # DEBUG (VERY IMPORTANT)
 # -----------------------------
-st.write("DEBUG: number of data points =", len(df))
 
 # -----------------------------
 # GRAPH (FORCED)
@@ -102,3 +101,4 @@ fig = px.line(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
