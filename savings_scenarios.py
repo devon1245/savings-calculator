@@ -5,26 +5,23 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from io import BytesIO
 
-# ------------------
-# PAGE SETUP
-# ------------------
 st.set_page_config(layout="wide")
 
 st.title("Savings Scenarios")
-st.write("Illustrating how saving behaviour matters, even when returns fluctuate.")
+st.write("Showing how saving behaviour matters even when returns fluctuate.")
 
 # ------------------
 # INPUTS
 # ------------------
-lump_sum = st.number_input("Current savings / lump sum (R)", 0.0, step=1000.0)
+lump_sum = st.number_input("Current savings (R)", 0.0, step=1000.0)
 monthly = st.number_input("Monthly contribution (R)", 2000.0, step=100.0)
 annual_inc = st.number_input("Annual increase (%)", 5.0, step=0.5)
 years = st.number_input("Years to invest", 20, step=1)
 
-low_ret = st.slider("Lower expected return (%)", 5.0, 9.0, 6.0, 0.5)
-high_ret = st.slider("Higher expected return (%)", 9.0, 15.0, 11.0, 0.5)
+low_ret = st.slider("Lower return (%)", 5.0, 9.0, 6.0, 0.5)
+high_ret = st.slider("Higher return (%)", 9.0, 15.0, 11.0, 0.5)
 
-extra = st.checkbox("Show impact of saving R500 more per month")
+extra = st.checkbox("Add R500 per month")
 EXTRA = 500
 
 # ------------------
@@ -32,15 +29,13 @@ EXTRA = 500
 # ------------------
 def grow(start, monthly, inc, r, y):
     bal = start
-    contrib = monthly
+    c = monthly
     out = []
-
-    for m in range(1, y * 12 + 1):
-        if m % 12 == 1 and m > 1:
-            contrib *= (1 + inc / 100)
-        bal = bal * (1 + r / 100 / 12) + contrib
+    for i in range(1, y * 12 + 1):
+        if i % 12 == 1 and i > 1:
+            c *= (1 + inc / 100)
+        bal = bal * (1 + r / 100 / 12) + c
         out.append(bal)
-
     return out
 
 # ------------------
@@ -70,7 +65,7 @@ if extra:
 df = pd.DataFrame(rows)
 
 # ------------------
-# COLOURS
+# GRAPH
 # ------------------
 colors = {
     "Current low": "#9ecae1",
@@ -79,28 +74,23 @@ colors = {
     "Extra high": "#d94801",
 }
 
-# ------------------
-# GRAPH
-# ------------------
 st.header("Projected growth")
-
-fig = px.line(
-    df,
-    x="Year",
-    y="Value",
-    color="Line",
-    color_discrete_map=colors
-)
-
+fig = px.line(df, x="Year", y="Value", color="Line", color_discrete_map=colors)
 st.plotly_chart(fig, use_container_width=True)
 
 # ------------------
-# TOTALS
+# TOTALS (NO METRIC, NO QUOTES RISK)
 # ------------------
-st.header("Value at end of period")
+st.header("Value at end")
 
 c1, c2 = st.columns(2)
 
 with c1:
     st.subheader("🔵 Current saving")
-    st.metric("Low
+    st.write("Lower return:", f"R {base_low[-1]:,.0f}")
+    st.write("Higher return:", f"R {base_high[-1]:,.0f}")
+
+with c2:
+    st.subheader("🟧 Saving + R500")
+    if extra:
+        st.write("Lowe
