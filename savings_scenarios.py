@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# ------------------
+# PAGE SETUP
+# ------------------
 st.set_page_config(layout="wide")
 
 st.title("Savings Scenarios")
@@ -32,7 +35,7 @@ def grow(start, monthly, inc, rate, years):
     for m in range(1, years * 12 + 1):
         if m % 12 == 1 and m > 1:
             contribution *= (1 + inc / 100)
-        balance = balance * (rate / 100 / 12 + 1) + contribution
+        balance = balance * (1 + rate / 100 / 12) + contribution
         values.append(balance)
 
     return values
@@ -76,11 +79,7 @@ if extra:
 df = pd.DataFrame(rows)
 
 # ------------------
-# SAFETY CHECK
-# ------------------
-
-# ------------------
-# GRAPH (FORCED RENDER)
+# GRAPH
 # ------------------
 st.header("Projected growth")
 
@@ -100,24 +99,26 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 # ------------------
-# TOTALS
+# TOTALS (COLOUR-CODED)
 # ------------------
 st.header("Value at end of period")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Current saving")
-    st.write(f"Lower return: R {base_low[-1]:,.0f}")
-    st.write(f"Higher return: R {base_high[-1]:,.0f}")
+    st.subheader("🔵 Current saving")
+    st.write("🔵", f"R {base_low[-1]:,.0f}")
+    st.write("🟦", f"R {base_high[-1]:,.0f}")
 
 with col2:
-    st.subheader("Saving + R500")
+    st.subheader("🟧 Saving + R500")
     if extra:
-        st.write(f"Lower return: R {extra_low[-1]:,.0f}")
-        st.write(f"Higher return: R {extra_high[-1]:,.0f}")
+        st.write("🟧", f"R {extra_low[-1]:,.0f}")
+        st.write("🟥", f"R {extra_high[-1]:,.0f}")
     else:
-        st.write("Tick the checkbox to compare.")
+        st.write("Enable comparison above")
 
+# ------------------
+# FOOTNOTE
+# ------------------
 st.caption("Illustrative only. Returns are not guaranteed.")
-
