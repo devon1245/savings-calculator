@@ -78,7 +78,6 @@ df = pd.DataFrame(rows)
 # ------------------
 # SAFETY CHECK
 # ------------------
-st.write("Data points:", len(df))
 
 # ------------------
 # GRAPH (FORCED RENDER)
@@ -121,3 +120,4 @@ with col2:
         st.write("Tick the checkbox to compare.")
 
 st.caption("Illustrative only. Returns are not guaranteed.")
+
